@@ -13,10 +13,6 @@ provider "aws" {
   region = "us-east-1"  # Change to your preferred AWS region
 }
 
-
-
-
-
 # 1. Define a VPC
 
 resource "aws_vpc" "main" {
@@ -26,8 +22,6 @@ resource "aws_vpc" "main" {
     Name = "MyVPC"
   }
 }
-
-
 
 # 2. Create Subnets
 
@@ -52,12 +46,37 @@ resource "aws_subnet" "private" {
   }
 }
 
+# 3. Add an Internet Gateway
 
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.main.id
 
+  tags = {
+    Name = "InternetGateway"
+  }
+}
 
+# 4. Add a Route Table
 
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
 
-# 4. Add an S3 Bucket
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+
+  tags = {
+    Name = "PublicRouteTable"
+  }
+}
+
+resource "aws_route_table_association" "a" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.public.id
+}
+
+# 5. Add an S3 Bucket
 
 resource "aws_s3_bucket" "my_bucket" {
   bucket = "my-unique-bucket-name-123456"  # Make sure the name is globally unique
@@ -69,10 +88,7 @@ resource "aws_s3_bucket" "my_bucket" {
   }
 }
 
-
-
-
-# 5. Configure IAM Roles and Policies
+# 6. Configure IAM Roles and Policies
 
 resource "aws_iam_role" "ec2_role" {
   name = "EC2S3AccessRole"
@@ -116,17 +132,13 @@ resource "aws_iam_role_policy_attachment" "ec2_s3_attachment" {
   policy_arn = aws_iam_policy.s3_access.arn
 }
 
-
-
-
-
-# 6. Assign IAM Role to EC2 Instance
+# 7. Assign IAM Role to EC2 Instance
 
 resource "aws_instance" "web" {
-  ami           = "ami-08b5b3a93ed654d19"  # Amazon Linux 2 AMI ID
-  instance_type = "t2.micro"
-  subnet_id     = aws_subnet.public.id
-  iam_instance_profile = aws_iam_role.ec2_role.name  # Attach the IAM role to the instance
+  ami                    = "ami-08b5b3a93ed654d19"  # Amazon Linux 2 AMI ID
+  instance_type          = "t2.micro"
+  subnet_id              = aws_subnet.public.id
+  iam_instance_profile   = aws_iam_role.ec2_role.name  # Attach the IAM role to the instance
 
   tags = {
     Name = "WebServer"
