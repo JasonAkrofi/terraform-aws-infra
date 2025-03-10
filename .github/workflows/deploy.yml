@@ -29,8 +29,8 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-arn: ${{ secrets.AWS_ROLE_ARN }}  # Use the secret here
-          region: ${{ secrets.AWS_REGION }}      # Use the secret for region
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}   # Correct input
+          aws-region: ${{ secrets.AWS_REGION }}         # Correct input
 
       - name: Terraform Init
         run: terraform init
