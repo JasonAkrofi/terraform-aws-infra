@@ -7,22 +7,25 @@ By eliminating the need for long-term AWS credentials, this setup ensures securi
 
 ## 🔧 Technologies Used
 - **Terraform** – Infrastructure as Code (IaC)
-- **AWS** – EC2, IAM, S3, VPC, and more
+- **AWS** – EC2, IAM, S3, VPC and more
 - **GitHub Actions** – CI/CD automation
 - **OpenID Connect (OIDC)** – Secure AWS authentication
 - **Docker** – Containerized deployments
 - **Terraform Cloud** – Remote state management
 
 ## 🏗️ Architecture
-![AWS Terraform Diagram](./architecture-diagram.png)
+![terraform-infrastructure-diagram](https://github.com/user-attachments/assets/c5402357-3f8d-42c7-83c9-c7112991da61)
+
 
 ### **Infrastructure Components**
-✅ **VPC & Subnets** – Securely isolated AWS network.
-✅ **IAM Roles & Policies** – Managed permissions for GitHub Actions via OIDC.
-✅ **EC2 Instances** – Compute resources deployed via Terraform.
-✅ **S3 Buckets** – Storage for Terraform state and application assets.
-✅ **Security Groups** – Controlled access to deployed resources.
-✅ **GitHub Actions** – Automated Terraform deployment with OIDC authentication.
+✅ **VPC & Subnets** – Securely isolated AWS network.  
+✅ **IAM Roles & Policies** – Managed permissions for GitHub Actions via OIDC.  
+✅ **EC2 Instances** – Compute resources deployed via Terraform.  
+✅ **S3 Buckets** – Storage for Terraform state and application assets.  
+✅ **Security Groups** – Controlled access to deployed resources.  
+✅ **GitHub Actions** – Automated Terraform deployment with OIDC authentication.  
+✅ **IAM Policies** – Granular access control for AWS resources.  
+✅ **OIDC for GitHub Actions** – Secure authentication without long-term credentials.  
 
 ---
 
@@ -35,7 +38,7 @@ cd terraform-aws-infrastructure
 
 ### 2️⃣ Set Up AWS OIDC Authentication (GitHub Actions)
 1. Go to **AWS IAM** → Create **OIDC Provider** for GitHub.
-2. Attach necessary permissions (Terraform deployments, S3, EC2, etc.).
+2. Attach necessary permissions (Terraform deployments, S3, EC2, IAM policies, etc.).
 3. Configure GitHub Secrets:
    - `AWS_ROLE_ARN`: IAM role ARN for GitHub Actions.
    - `AWS_REGION`: Your AWS region (e.g., `us-east-1`).
@@ -52,11 +55,13 @@ terraform apply -auto-approve
 ---
 
 ## 🎯 Key Features
-✅ **Infrastructure as Code (IaC)** – Reproducible and version-controlled.
-✅ **GitHub OIDC Authentication** – Eliminates long-term AWS credentials.
-✅ **Modular Terraform Configuration** – Easily extendable.
-✅ **CI/CD Pipeline** – Auto-deployment with GitHub Actions.
-✅ **Secure AWS Deployment** – IAM roles, policies, and best practices.
+✅ **Infrastructure as Code (IaC)** – Reproducible and version-controlled.  
+✅ **GitHub OIDC Authentication** – Eliminates long-term AWS credentials.  
+✅ **Modular Terraform Configuration** – Easily extendable.  
+✅ **CI/CD Pipeline** – Auto-deployment with GitHub Actions.  
+✅ **Secure AWS Deployment** – IAM roles, policies, and best practices.  
+✅ **S3 Bucket Integration** – Centralized storage management.  
+✅ **Automated Terraform Deployment** – Hands-free infrastructure updates.  
 
 ---
 
@@ -79,16 +84,16 @@ terraform apply -auto-approve
 🔹 Add Terraform state backend (S3 + DynamoDB).  
 🔹 Implement monitoring with AWS CloudWatch.  
 🔹 Enhance security with AWS IAM least privilege policies.  
+🔹 Implement auto-scaling for EC2 instances.  
 
 ---
 
 ## 👨‍💻 Author
-**Jason Akrofi**  
-💼 [LinkedIn](https://www.linkedin.com/in/YOUR-LINKEDIN)  
-📧 **Email:** your.email@example.com  
+**Jason Akrofi Ocansey**  
 
----
 
-## ⭐ Like This Project?
-Give it a ⭐ on GitHub to support my work!
+💼 **LinkedIn:** https://www.linkedin.com/in/jason-ocansey-05410934b/
 
+
+
+📧 **Email:** jasonocansey2706@gmail.com
