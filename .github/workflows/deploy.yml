@@ -44,8 +44,11 @@ jobs:
       - name: Terraform Format Check
         run: terraform fmt -check
 
+      - name: List Directory Contents (Pre-Plan)
+        run: ls -l
+
       - name: Terraform Plan
-        run: terraform plan -out=tfplan
+        run: terraform plan -out=tfplan && terraform show -no-color tfplan
 
       - name: List Directory Contents (Post-Plan)
         run: ls -l
@@ -54,14 +57,12 @@ jobs:
         id: check_tfplan
         run: |
           if [ -f "tfplan" ]; then
-            echo "tfplan exists"
+            echo "::set-output name=exists::true"
           else
-            echo "tfplan does not exist"
-            exit 1
-          fi
+            echo "::set-output name=exists::false"
 
       - name: Terraform Apply
-        if: steps.check_tfplan.outputs.result == 'tfplan exists'
+        if: steps.check_tfplan.outputs.exists == 'true'
         run: terraform apply -auto-approve tfplan
 
       - name: List Directory Contents (Post-Apply)
