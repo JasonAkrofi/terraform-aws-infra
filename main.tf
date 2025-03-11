@@ -13,12 +13,7 @@ provider "aws" {
   region = "us-east-1" # Change to your preferred AWS region
 }
 
-
-
-
-
 # 1. Define a VPC
-
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
 
@@ -27,10 +22,7 @@ resource "aws_vpc" "main" {
   }
 }
 
-
-
 # 2. Create Subnets
-
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.1.0/24"
@@ -57,35 +49,34 @@ resource "aws_subnet" "private" {
 
 
 
-# 4. Add an S3 Bucket
 
-resource "aws_s3_bucket" "my_bucket" {
-  bucket = "terraform-aws-infra-bucket-2706"
-  force_destroy = true
+# 3. Create an EC2 Instance
+
+resource "aws_instance" "web" {
+  ami           = "ami-08b5b3a93ed654d19"  # Amazon Linux 2 AMI ID
+  instance_type = "t2.micro"
+  subnet_id     = aws_subnet.public.id
 
   tags = {
-    Name = "MyS3Bucket"
+    Name = "WebServer"
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "block_public_access" {
-  bucket = aws_s3_bucket.my_bucket.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
+resource "aws_route_table_association" "a" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.public.id
 }
 
-resource "aws_s3_bucket_ownership_controls" "ownership" {
-  bucket = aws_s3_bucket.my_bucket.id
+# 5. Add an S3 Bucket
+resource "aws_s3_bucket" "my_bucket" {
+  bucket = "terraform-aws-infra-2706"  # Make sure the name is globally unique
+  acl    = "private"
 
-  rule {
-    object_ownership = "BucketOwnerEnforced"
+  tags = {
+    Name        = "MyS3Bucket"
+    Environment = "Production"
   }
 }
-
-
 
 
 
@@ -134,17 +125,18 @@ resource "aws_iam_role_policy_attachment" "ec2_s3_attachment" {
   policy_arn = aws_iam_policy.s3_access.arn
 }
 
+# 7. Create an Instance Profile
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "EC2InstanceProfile"
+  role = aws_iam_role.ec2_role.name
+}
 
-
-
-
-# 6. Assign IAM Role to EC2 Instance
-
+# 8. Assign IAM Role to EC2 Instance
 resource "aws_instance" "web" {
-  ami                  = "ami-08b5b3a93ed654d19" # Amazon Linux 2 AMI ID
-  instance_type        = "t2.micro"
-  subnet_id            = aws_subnet.public.id
-  iam_instance_profile = "EC2InstanceProfile"
+  ami           = "ami-08b5b3a93ed654d19"  # Amazon Linux 2 AMI ID
+  instance_type = "t2.micro"
+  subnet_id     = aws_subnet.public.id
+  iam_instance_profile = aws_iam_role.ec2_role.name  # Attach the IAM role to the instance
 
   tags = {
     Name = "WebServer"

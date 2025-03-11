@@ -24,16 +24,22 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: latest
+          terraform_version: 1.11.1
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::337909750041:role/github-actions-oicd-role
-          aws-region: us-east-1
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Output Terraform Version
+        run: terraform -version
 
       - name: Terraform Init
         run: terraform init
+
+      - name: Validate Terraform Configuration
+        run: terraform validate
 
       - name: Terraform Format Check
         run: terraform fmt -check
@@ -44,3 +50,10 @@ jobs:
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve tfplan
+      - name: Show Terraform Logs
+        if: failure() # Only runs if a step fails
+        run: |
+          echo "Terraform Plan Output:"
+          cat tfplan || echo "No tfplan file found"
+          echo "Terraform Apply Output:"
+          terraform show -no-color tfplan || echo "Failed to generate logs"
