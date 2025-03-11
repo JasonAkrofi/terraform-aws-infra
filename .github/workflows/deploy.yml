@@ -54,20 +54,15 @@ jobs:
         id: check_tfplan
         run: |
           if [ -f "tfplan" ]; then
-            echo "tfplan exists" >> $GITHUB_ENV
+            echo "TFPLAN_EXISTS=true" >> $GITHUB_ENV
           else
-            echo "tfplan does not exist" >> $GITHUB_ENV
+            echo "TFPLAN_EXISTS=false" >> $GITHUB_ENV
             exit 1
           fi
-
-      - name: Show Terraform Plan Output (Debug)
-        if: always()
-        run: |
-          echo "Terraform Plan Output:"
-          terraform show -no-color tfplan || echo "No tfplan file found"
+          
 
       - name: Terraform Apply
-        if: ${{ env.tfplan == 'tfplan exists' }}
+        if: env.TFPLAN_EXISTS == 'true'
         run: terraform apply -auto-approve tfplan
 
       - name: List Directory Contents (Post-Apply)
