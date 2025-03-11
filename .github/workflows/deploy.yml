@@ -58,7 +58,12 @@ jobs:
           else
             echo "tfplan does not exist" >> $GITHUB_ENV
             exit 1
-          fi
+
+      - name: Show Terraform Plan Output (Debug)
+        if: always()
+        run: |
+          echo "Terraform Plan Output:"
+          terraform show -no-color tfplan || echo "No tfplan file found"
 
       - name: Terraform Apply
         if: ${{ env.tfplan == 'tfplan exists' }}
