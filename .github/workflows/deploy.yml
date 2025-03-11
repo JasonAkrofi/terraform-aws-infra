@@ -8,70 +8,33 @@ on:
     branches:
       - main
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
-  terraform:
-    name: Terraform Apply
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.11.1
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ secrets.AWS_REGION }}
+    - name: Terraform Init
+      run: terraform init
 
-      - name: Output Terraform Version
-        run: terraform -version
+    - name: Terraform Plan
+      run: terraform plan -out=tfplan
 
-      - name: Terraform Init
-        run: terraform init
+    - name: Verify tfplan file
+      run: |
+        if [ ! -f tfplan ]; then
+          echo "tfplan file not found"
+          exit 1
+        fi
 
-      - name: Validate Terraform Configuration
-        run: terraform validate
+    - name: List files
+      run: ls -la
 
-      - name: Terraform Format Check
-        run: terraform fmt -check
-
-      - name: List Directory Contents (Pre-Plan)
-        run: ls -l
-
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan && terraform show -no-color tfplan
-
-      - name: List Directory Contents (Post-Plan)
-        run: ls -l
-
-      - name: Check if tfplan exists
-        id: check_tfplan
-        run: |
-          if [ -f "tfplan" ]; then
-            echo "::set-output name=exists::true"
-          else
-            echo "::set-output name=exists::false"
-
-      - name: Terraform Apply
-        if: steps.check_tfplan.outputs.exists == 'true'
-        run: terraform apply -auto-approve tfplan
-
-      - name: List Directory Contents (Post-Apply)
-        run: ls -l
-
-      - name: Show Terraform Logs
-        if: failure() # Only runs if a step fails
-        run: |
-          echo "Terraform Plan Output:"
-          terraform show -no-color tfplan || echo "No tfplan file found"
-          echo "Terraform Apply Output:"
-          terraform show -no-color tfplan || echo "Failed to generate logs"
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main'
+      run: terraform apply -input=false tfplan
