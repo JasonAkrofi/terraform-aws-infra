@@ -47,9 +47,13 @@ jobs:
       - name: Terraform Plan
         run: terraform plan -out=tfplan
 
+      - name: List Directory Contents
+        run: ls -l
+
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve tfplan
+
       - name: Show Terraform Logs
         if: failure() # Only runs if a step fails
         run: |
