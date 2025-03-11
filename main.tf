@@ -46,9 +46,9 @@ resource "aws_subnet" "private" {
 
 # 3. Create an EC2 Instance
 resource "aws_instance" "web" {
-  ami                 = "ami-08b5b3a93ed654d19"  # Amazon Linux 2 AMI ID
-  instance_type       = "t2.micro"
-  subnet_id           = aws_subnet.public.id
+  ami                  = "ami-08b5b3a93ed654d19" # Amazon Linux 2 AMI ID
+  instance_type        = "t2.micro"
+  subnet_id            = aws_subnet.public.id
   iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
 
   tags = {
@@ -109,7 +109,7 @@ resource "aws_iam_instance_profile" "ec2_profile" {
 
 # 8. Add an S3 Bucket
 resource "aws_s3_bucket" "my_bucket" {
-  bucket = "terraform-aws-infra-2706"  # Make sure the name is globally unique
+  bucket = "terraform-aws-infra-2706" # Make sure the name is globally unique
   acl    = "private"
 
   tags = {
