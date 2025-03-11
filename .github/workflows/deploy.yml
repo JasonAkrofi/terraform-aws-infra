@@ -50,8 +50,18 @@ jobs:
       - name: List Directory Contents (Post-Plan)
         run: ls -l
 
+      - name: Check if tfplan exists
+        id: check_tfplan
+        run: |
+          if [ -f "tfplan" ]; then
+            echo "tfplan exists"
+          else
+            echo "tfplan does not exist"
+            exit 1
+          fi
+
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && fileExists('tfplan')
+        if: steps.check_tfplan.outputs.result == 'tfplan exists'
         run: terraform apply -auto-approve tfplan
 
       - name: List Directory Contents (Post-Apply)
@@ -64,15 +74,3 @@ jobs:
           terraform show -no-color tfplan || echo "No tfplan file found"
           echo "Terraform Apply Output:"
           terraform show -no-color tfplan || echo "Failed to generate logs"
-
-# Helper step to check if file exists
-      - name: Check for tfplan file
-        id: check_tfplan
-        run: |
-           if [ -f "tfplan" ]; then
-             echo "tfplan exists"
-           else
-             echo "tfplan does not exist"
-             exit 1
-           fi
-
