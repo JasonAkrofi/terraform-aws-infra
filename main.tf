@@ -74,7 +74,7 @@ resource "aws_route_table_association" "a" {
 
 # 5. Add an S3 Bucket
 resource "aws_s3_bucket" "my_bucket" {
-  bucket = "my-unique-bucket-name-123456"
+  bucket = "terraform-aws-infra-bucket"
 }
 
 resource "aws_s3_bucket_public_access_block" "block_public_access" {
@@ -85,6 +85,26 @@ resource "aws_s3_bucket_public_access_block" "block_public_access" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
+resource "aws_s3_bucket_ownership_controls" "ownership" {
+  bucket = aws_s3_bucket.my_bucket.id
+
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
+}
+
+resource "aws_s3_bucket_acl" "acl" {
+  bucket = aws_s3_bucket.my_bucket.id
+  acl    = "private"
+  depends_on = [aws_s3_bucket_ownership_controls.ownership]
+}
+
+
+
+
+
+
 
 # 6. Configure IAM Roles and Policies
 resource "aws_iam_role" "ec2_role" {
