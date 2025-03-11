@@ -27,7 +27,7 @@ jobs:
           terraform_version: 1.11.1
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -47,13 +47,30 @@ jobs:
       - name: Terraform Plan
         run: terraform plan -out=tfplan
 
+      - name: List Directory Contents (Post-Plan)
+        run: ls -l
+
+      - name: Check if tfplan exists
+        id: check_tfplan
+        run: |
+          if [ -f "tfplan" ]; then
+            echo "tfplan exists" >> $GITHUB_ENV
+          else
+            echo "tfplan does not exist" >> $GITHUB_ENV
+            exit 1
+          fi
+
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
+        if: ${{ env.tfplan == 'tfplan exists' }}
         run: terraform apply -auto-approve tfplan
+
+      - name: List Directory Contents (Post-Apply)
+        run: ls -l
+
       - name: Show Terraform Logs
         if: failure() # Only runs if a step fails
         run: |
           echo "Terraform Plan Output:"
-          cat tfplan || echo "No tfplan file found"
+          terraform show -no-color tfplan || echo "No tfplan file found"
           echo "Terraform Apply Output:"
           terraform show -no-color tfplan || echo "Failed to generate logs"
