@@ -61,7 +61,7 @@ jobs:
           fi
 
       - name: Terraform Apply
-        if: env.tfplan == 'tfplan exists'
+        if: ${{ env.tfplan == 'tfplan exists' }}
         run: terraform apply -auto-approve tfplan
 
       - name: List Directory Contents (Post-Apply)
